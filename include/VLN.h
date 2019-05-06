@@ -23,15 +23,49 @@
 #ifndef VLN_VLN_H
 #define VLN_VLN_H
 
+#include <vector>
+#include <limits>
+#include <cstdint>
+#include <optional>
+
 namespace sav
 {
 	class VLN
 	{
 		public:
+			// Constructor for initial unsigned 64-bit value.
+			VLN(std::uint64_t _initial);
 
+			std::optional<std::uint64_t> ToUInt64() const;
+
+			bool operator==(const VLN& _rhs) const;
+			bool operator!=(const VLN& _rhs) const;
+
+			bool operator<(const VLN& _rhs) const;
+			bool operator>(const VLN& _rhs) const;
+
+			bool operator<=(const VLN& _rhs) const;
+			bool operator>=(const VLN& _rhs) const;
 
 		protected:
+			enum
+			{
+				kBaseTen = 10,
+				kBase256 = std::numeric_limits<std::uint8_t>::max() + 1
+			};
 
+			std::vector<std::uint8_t> m_digits;
+
+			static const VLN kVLNWhichEqualUInt64Max;
+
+			/**
+			 * UnsafeIntegerPower - perform integer exponentiation without overflow checks.
+			 * For internal use in ToUInt64() function.
+			 * @param _base
+			 * @param _index
+			 * @return strictly integer result
+			 */
+			static std::uint64_t UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index);
 	};
 }
 
