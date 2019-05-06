@@ -33,11 +33,18 @@ namespace sav
 	class VLN
 	{
 		public:
-			// Constructor for initial unsigned 64-bit value.
-			VLN(std::uint64_t _initial);
+			// Constructor for an initial unsigned 64-bit value.
+			explicit VLN(std::uint64_t _initial);
+
+			// Constructor for an empty value.
+			explicit VLN();
 
 			std::optional<std::uint64_t> ToUInt64() const;
 
+			// Returns false if VLN integrity has been violated (e.g. divided by zero), true otherwise
+			explicit operator bool() const;
+
+			// Comparison operators
 			bool operator==(const VLN& _rhs) const;
 			bool operator!=(const VLN& _rhs) const;
 
@@ -47,14 +54,31 @@ namespace sav
 			bool operator<=(const VLN& _rhs) const;
 			bool operator>=(const VLN& _rhs) const;
 
+			// Immutable arithmetic operators.
+			VLN operator+(const VLN& _rhs) const;
+			VLN operator-(const VLN& _rhs) const;
+			VLN operator*(const VLN& _rhs) const;
+			VLN operator/(const VLN& _rhs) const;
+
+			// Mutable arithmetic operators (implementation depends on the immutable ones).
+			VLN& operator+=(const VLN& _rhs);
+			VLN& operator-=(const VLN& _rhs);
+			VLN& operator*=(const VLN& _rhs);
+			VLN& operator/=(const VLN& _rhs);
+
 		protected:
 			enum
 			{
-				kBaseTen = 10,
+				kBase10 = 10,
 				kBase256 = std::numeric_limits<std::uint8_t>::max() + 1
 			};
 
 			std::vector<std::uint8_t> m_digits;
+
+			// Becomes false on invalid operations
+			// (such as division by zero, subtraction by greater value (which is senseless for unsigned),
+			// so operator bool returns false.
+			bool m_ok = true;
 
 			static const VLN kVLNWhichEqualUInt64Max;
 
@@ -66,6 +90,8 @@ namespace sav
 			 * @return strictly integer result
 			 */
 			static std::uint64_t UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index);
+
+			std::string ToBase10() const;
 	};
 }
 
