@@ -266,8 +266,60 @@ sav::VLN sav::VLN::operator-(const sav::VLN& _rhs) const
 
 sav::VLN sav::VLN::operator*(const sav::VLN& _rhs) const
 {
-	// TODO
-	return VLN();
+	VLN result;
+
+	// if one of multipliers equal to 0
+	if( (this->m_digits.size() == 1 && this->m_digits[0] == 0x00) ||
+		(_rhs.m_digits.size() == 1 && _rhs.m_digits[0] == 0x00) )
+	{
+		// return 0;
+		return result;
+	}
+
+	// if one of multipliers equal to 1, return the other one
+	//
+	if(this->m_digits.size() == 1 && this->m_digits[0] == 0x01)
+	{
+		return _rhs;
+	}
+	//
+	if(_rhs.m_digits.size() == 1 && _rhs.m_digits[0] == 0x01)
+	{
+		return (*this);
+	}
+
+	// Perform an actual multiplication
+	std::uint8_t carry = 0;
+	for(int currentRhsDigit = 0; currentRhsDigit < _rhs.m_digits.size(); currentRhsDigit++)
+	{
+		VLN intermediateSum;
+		intermediateSum.m_digits.clear();
+
+		// 1234 * 567 =
+		// 1234 * 7 * 10^0 + 1234 * 6 * 10^1 + 1234 * 5 * 10^2 =
+		// __8638 + <- intermediate sum 0 (0th digit of the second multiplier: 0 digits to complete) : --
+		// _74040 + <- intermediate sum 1 (1th digit of the second multiplier: 1 digits to complete) : 0
+		// 123900   <- intermediate sum 2 (2th digit of the second multiplier: 2 digits to complete) : 00
+		//
+		// index of 10 is a count of digits to complete for each next intermediate sum
+		// (notice it's actually base256, not base10)
+		for(int i = 0; i < currentRhsDigit; i++)
+		{
+			intermediateSum.m_digits.push_back(0x00);
+		}
+
+		for(int currentThisDigit = 0; currentThisDigit < this->m_digits.size(); currentThisDigit++)
+		{
+			std::uint16_t reg =  _rhs.m_digits[currentRhsDigit] * this->m_digits[currentThisDigit];
+			intermediateSum.m_digits.push_back(carry + static_cast<std::uint8_t>(reg & static_cast<std::uint8_t>(0xFF)));
+			carry = reg & static_cast<std::uint16_t>(0xFF'00);
+		}
+
+		// Accumulate intermediate sum
+		result += intermediateSum;
+	}
+
+	return result;
 }
 
 sav::VLN sav::VLN::operator/(const sav::VLN& _rhs) const
