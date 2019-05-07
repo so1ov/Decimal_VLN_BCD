@@ -151,7 +151,7 @@ std::string sav::VLN::ToBase10() const
 
 sav::VLN::operator bool() const
 {
-	return m_ok;
+	return m_status == VLNStatus::Ok;
 }
 
 sav::VLN sav::VLN::operator+(const sav::VLN& _rhs) const
@@ -216,7 +216,7 @@ sav::VLN sav::VLN::operator-(const sav::VLN& _rhs) const
 
 	if( (*this) < _rhs)
 	{
-		result.m_ok = false;
+		result.m_status = VLNStatus::Error_Underflow;
 		return result;
 	}
 

@@ -7,7 +7,8 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 
 set(${PROJECT_NAME}_SOURCES
-        include/VLN.h src/VLN.cpp)
+        include/VLN.h src/VLN.cpp
+        include/VLNStatus.h)
 
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)

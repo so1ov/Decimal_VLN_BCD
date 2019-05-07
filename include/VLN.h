@@ -23,6 +23,8 @@
 #ifndef VLN_VLN_H
 #define VLN_VLN_H
 
+#include "VLNStatus.h"
+
 #include <vector>
 #include <limits>
 #include <cstdint>
@@ -75,10 +77,7 @@ namespace sav
 
 			std::vector<std::uint8_t> m_digits;
 
-			// Becomes false on invalid operations
-			// (such as division by zero, subtraction by greater value (which is senseless for unsigned),
-			// so operator bool returns false.
-			bool m_ok = true;
+			VLNStatus m_status = VLNStatus::Ok;
 
 			static const VLN kVLNWhichEqualUInt64Max;
 
