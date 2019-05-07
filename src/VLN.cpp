@@ -188,6 +188,7 @@ sav::VLN sav::VLN::operator+(const sav::VLN& _rhs) const
 				carry = 1;
 			}
 
+			// perform actual addition
 			accumulator += this->m_digits[i];
 		}
 
@@ -199,6 +200,7 @@ sav::VLN sav::VLN::operator+(const sav::VLN& _rhs) const
 				carry = 1;
 			}
 
+			// perform actual addition
 			accumulator += _rhs.m_digits[i];
 		}
 
@@ -252,19 +254,12 @@ sav::VLN sav::VLN::operator-(const sav::VLN& _rhs) const
 				carry = 1;
 			}
 
+			// perform actual subtraction
 			result.m_digits[i] -= _rhs.m_digits[i];
 		}
 	}
 
-	// Normalize result
-	for(int i = result.m_digits.size() - 1; i >= 0; i--)
-	{
-		if( result.m_digits[i] != 0x00 )
-		{
-			result.m_digits = std::vector<std::uint8_t>{result.m_digits.begin(), result.m_digits.begin() + i + 1};
-			break;
-		}
-	}
+	result.Normalize();
 
 	return result;
 }
@@ -307,4 +302,16 @@ sav::VLN& sav::VLN::operator/=(const sav::VLN& _rhs)
 	(*this) = (*this) / _rhs;
 
 	return (*this);
+}
+
+void sav::VLN::Normalize()
+{
+	for(int i = m_digits.size() - 1; i >= 0; i--)
+	{
+		if( m_digits[i] != 0x00 )
+		{
+			m_digits = std::vector<std::uint8_t>{m_digits.begin(), m_digits.begin() + i + 1};
+			break;
+		}
+	}
 }

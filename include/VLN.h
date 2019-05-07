@@ -92,6 +92,12 @@ namespace sav
 			static std::uint64_t UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index);
 
 			std::string ToBase10() const;
+
+			/**
+			 * Normalize - remove unsignificant zeros.
+			 * (e.g. for base10 : 0001023 -> 1023)
+			 */
+			void Normalize();
 	};
 }
 
