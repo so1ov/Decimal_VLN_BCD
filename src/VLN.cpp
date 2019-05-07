@@ -310,6 +310,12 @@ sav::VLN sav::VLN::operator*(const sav::VLN& _rhs) const
 
 		for(int currentThisDigit = 0; currentThisDigit < this->m_digits.size(); currentThisDigit++)
 		{
+			// 1234 *
+			//	567
+			//	Step 1: 1234 * 7 ,
+			//		Step 1.1 : 4 * 7, reg = 4 * 7 = 28, current digit = 8, carry = 2
+			//		Step 1.2 : 3 * 7, reg = 3 * 7 = 21, current digit = carry (which is still 2) + 1 = 3, new carry = 2
+			//		...
 			std::uint16_t reg =  _rhs.m_digits[currentRhsDigit] * this->m_digits[currentThisDigit];
 			intermediateSum.m_digits.push_back(carry + static_cast<std::uint8_t>(reg & static_cast<std::uint8_t>(0xFF)));
 			carry = reg & static_cast<std::uint16_t>(0xFF'00);
