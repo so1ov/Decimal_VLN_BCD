@@ -2,71 +2,74 @@
 // Copyright Artur Soloviev 2019
 // soloviev.artur@gmail.com
 //
-// VLN.h
+// Decimal.h
 //
-// This file is part of VLN Toolkit.
+// This file is part of Decimal_VLN_BCD.
 //
-// VLN Toolkit is free software: you can redistribute it and/or modify
+// Decimal_VLN_BCD is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// VLN Toolkit is distributed in the hope that it will be useful,
+// Decimal_VLN_BCD is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with VLN Toolkit.  If not, see <https://www.gnu.org/licenses/>.
+// along with Decimal_VLN_BCD.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef VLN_VLN_H
-#define VLN_VLN_H
+#ifndef DECIMAL_VLN_BCD_VLN_H
+#define DECIMAL_VLN_BCD_VLN_H
 
-#include "VLNStatus.h"
+#include "DecimalStatus.h"
 
 #include <vector>
 #include <limits>
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 namespace sav
 {
-	class VLN
+	class Decimal
 	{
 		public:
 			// Constructor for an initial unsigned 64-bit value.
-			explicit VLN(std::uint64_t _initial);
+			explicit Decimal(std::uint64_t _initial);
 
 			// Constructor for an empty value.
-			explicit VLN();
+			explicit Decimal();
 
 			std::optional<std::uint64_t> ToUInt64() const;
 
-			// Returns false if VLN integrity has been violated (e.g. divided by zero), true otherwise
+			// Returns false if Decimal integrity has been violated (e.g. divided by zero), true otherwise
 			explicit operator bool() const;
 
 			// Comparison operators
-			bool operator==(const VLN& _rhs) const;
-			bool operator!=(const VLN& _rhs) const;
+			bool operator==(const Decimal& _rhs) const;
+			bool operator!=(const Decimal& _rhs) const;
 
-			bool operator<(const VLN& _rhs) const;
-			bool operator>(const VLN& _rhs) const;
+			bool operator<(const Decimal& _rhs) const;
+			bool operator>(const Decimal& _rhs) const;
 
-			bool operator<=(const VLN& _rhs) const;
-			bool operator>=(const VLN& _rhs) const;
+			bool operator<=(const Decimal& _rhs) const;
+			bool operator>=(const Decimal& _rhs) const;
 
 			// Immutable arithmetic operators.
-			VLN operator+(const VLN& _rhs) const;
-			VLN operator-(const VLN& _rhs) const;
-			VLN operator*(const VLN& _rhs) const;
-			VLN operator/(const VLN& _rhs) const;
+			Decimal operator+(const Decimal& _rhs) const;
+			Decimal operator-(const Decimal& _rhs) const;
+			Decimal operator*(const Decimal& _rhs) const;
+			// in the result pair, first is quotient (integer part) and second is remainder
+			std::pair<Decimal, Decimal> operator/(const Decimal& _rhs) const;
 
 			// Mutable arithmetic operators (implementation depends on the immutable ones).
-			VLN& operator+=(const VLN& _rhs);
-			VLN& operator-=(const VLN& _rhs);
-			VLN& operator*=(const VLN& _rhs);
-			VLN& operator/=(const VLN& _rhs);
+			Decimal& operator+=(const Decimal& _rhs);
+			Decimal& operator-=(const Decimal& _rhs);
+			Decimal& operator*=(const Decimal& _rhs);
+			// Unable to perform in-place division without remainder loss. Use operator/ .
+			void operator/=(const Decimal& _rhs) = delete;
 
 		protected:
 			enum
@@ -77,9 +80,9 @@ namespace sav
 
 			std::vector<std::uint8_t> m_digits;
 
-			VLNStatus m_status = VLNStatus::Ok;
+			DecimalStatus m_status = DecimalStatus::Ok;
 
-			static const VLN kVLNWhichEqualUInt64Max;
+			static const Decimal kDecimalWhichEqualUInt64Max;
 
 			/**
 			 * UnsafeIntegerPower - perform integer exponentiation without overflow checks.
@@ -100,4 +103,4 @@ namespace sav
 	};
 }
 
-#endif //VLN_VLN_H
+#endif //DECIMAL_VLN_BCD_VLN_H

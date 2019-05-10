@@ -2,29 +2,29 @@
 // Copyright Artur Soloviev 2019
 // soloviev.artur@gmail.com
 //
-// VLN.cpp
+// Decimal.cpp
 //
-// This file is part of VLN Toolkit.
+// This file is part of Decimal_VLN_BCD.
 //
-// VLN Toolkit is free software: you can redistribute it and/or modify
+// Decimal_VLN_BCD is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// VLN Toolkit is distributed in the hope that it will be useful,
+// Decimal_VLN_BCD is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with VLN Toolkit.  If not, see <https://www.gnu.org/licenses/>.
+// along with Decimal_VLN_BCD.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "VLN.h"
+#include "Decimal.h"
 
 #include <numeric>
 
-sav::VLN::VLN(std::uint64_t _initial)
+sav::Decimal::Decimal(std::uint64_t _initial)
 {
 	for(;;)
 	{
@@ -38,18 +38,18 @@ sav::VLN::VLN(std::uint64_t _initial)
 	}
 }
 
-sav::VLN::VLN()
+sav::Decimal::Decimal()
 {
 	m_digits.push_back(0x00);
 }
 
-const sav::VLN sav::VLN::kVLNWhichEqualUInt64Max = sav::VLN{
+const sav::Decimal sav::Decimal::kDecimalWhichEqualUInt64Max = sav::Decimal{
 	std::numeric_limits<std::uint64_t>::max()
 };
 
-std::optional<std::uint64_t> sav::VLN::ToUInt64() const
+std::optional<std::uint64_t> sav::Decimal::ToUInt64() const
 {
-	if( (*this) > kVLNWhichEqualUInt64Max)
+	if( (*this) > kDecimalWhichEqualUInt64Max)
 	{
 		return std::nullopt;
 	}
@@ -66,17 +66,17 @@ std::optional<std::uint64_t> sav::VLN::ToUInt64() const
 	return std::optional<std::uint64_t>{result};
 }
 
-bool sav::VLN::operator==(const sav::VLN& _rhs) const
+bool sav::Decimal::operator==(const sav::Decimal& _rhs) const
 {
 	return this->m_digits == _rhs.m_digits;
 }
 
-bool sav::VLN::operator!=(const sav::VLN& _rhs) const
+bool sav::Decimal::operator!=(const sav::Decimal& _rhs) const
 {
 	return !((*this) == _rhs);
 }
 
-bool sav::VLN::operator<(const sav::VLN& _rhs) const
+bool sav::Decimal::operator<(const sav::Decimal& _rhs) const
 {
 	if(this->m_digits.size() > _rhs.m_digits.size())
 	{
@@ -102,22 +102,22 @@ bool sav::VLN::operator<(const sav::VLN& _rhs) const
 	return false;
 }
 
-bool sav::VLN::operator>(const sav::VLN& _rhs) const
+bool sav::Decimal::operator>(const sav::Decimal& _rhs) const
 {
 	return !((*this) == _rhs) && !((*this) < _rhs);
 }
 
-bool sav::VLN::operator<=(const sav::VLN& _rhs) const
+bool sav::Decimal::operator<=(const sav::Decimal& _rhs) const
 {
 	return ((*this) < _rhs) || ((*this) == _rhs);
 }
 
-bool sav::VLN::operator>=(const sav::VLN& _rhs) const
+bool sav::Decimal::operator>=(const sav::Decimal& _rhs) const
 {
 	return (!((*this) < _rhs)) || ((*this) == _rhs);
 }
 
-std::uint64_t sav::VLN::UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index)
+std::uint64_t sav::Decimal::UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index)
 {
 	if(_index == 0)
 	{
@@ -142,21 +142,21 @@ std::uint64_t sav::VLN::UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _i
 	return result;
 }
 
-std::string sav::VLN::ToBase10() const
+std::string sav::Decimal::ToBase10() const
 {
 
 
 	return std::__cxx11::string();
 }
 
-sav::VLN::operator bool() const
+sav::Decimal::operator bool() const
 {
-	return m_status == VLNStatus::Ok;
+	return m_status == DecimalStatus::Ok;
 }
 
-sav::VLN sav::VLN::operator+(const sav::VLN& _rhs) const
+sav::Decimal sav::Decimal::operator+(const sav::Decimal& _rhs) const
 {
-	VLN result;
+	Decimal result;
 	result.m_digits.clear();
 
 	std::uint8_t carry = 0;
@@ -210,13 +210,13 @@ sav::VLN sav::VLN::operator+(const sav::VLN& _rhs) const
 	return result;
 }
 
-sav::VLN sav::VLN::operator-(const sav::VLN& _rhs) const
+sav::Decimal sav::Decimal::operator-(const sav::Decimal& _rhs) const
 {
-	VLN result;
+	Decimal result;
 
 	if( (*this) < _rhs)
 	{
-		result.m_status = VLNStatus::Error_Underflow;
+		result.m_status = DecimalStatus::Error_Underflow;
 		return result;
 	}
 
@@ -264,9 +264,9 @@ sav::VLN sav::VLN::operator-(const sav::VLN& _rhs) const
 	return result;
 }
 
-sav::VLN sav::VLN::operator*(const sav::VLN& _rhs) const
+sav::Decimal sav::Decimal::operator*(const sav::Decimal& _rhs) const
 {
-	VLN result;
+	Decimal result;
 
 	// if one of multipliers equal to 0
 	if( (this->m_digits.size() == 1 && this->m_digits[0] == 0x00) ||
@@ -292,7 +292,7 @@ sav::VLN sav::VLN::operator*(const sav::VLN& _rhs) const
 	std::uint8_t carry = 0;
 	for(int currentRhsDigit = 0; currentRhsDigit < _rhs.m_digits.size(); currentRhsDigit++)
 	{
-		VLN intermediateSum;
+		Decimal intermediateSum;
 		intermediateSum.m_digits.clear();
 
 		// 1234 * 567 =
@@ -328,41 +328,38 @@ sav::VLN sav::VLN::operator*(const sav::VLN& _rhs) const
 	return result;
 }
 
-sav::VLN sav::VLN::operator/(const sav::VLN& _rhs) const
+std::pair<sav::Decimal, sav::Decimal> sav::Decimal::operator/(const sav::Decimal& _rhs) const
 {
+	Decimal resultQuotient;
+	Decimal resultRemainder;
+
 	// TODO
-	return VLN();
+
+	return std::pair<Decimal, Decimal>(resultQuotient, resultRemainder);
 }
 
-sav::VLN& sav::VLN::operator+=(const sav::VLN& _rhs)
+sav::Decimal& sav::Decimal::operator+=(const sav::Decimal& _rhs)
 {
 	(*this) = (*this) + _rhs;
 
 	return (*this);
 }
 
-sav::VLN& sav::VLN::operator-=(const sav::VLN& _rhs)
+sav::Decimal& sav::Decimal::operator-=(const sav::Decimal& _rhs)
 {
 	(*this) = (*this) - _rhs;
 
 	return (*this);
 }
 
-sav::VLN& sav::VLN::operator*=(const sav::VLN& _rhs)
+sav::Decimal& sav::Decimal::operator*=(const sav::Decimal& _rhs)
 {
 	(*this) = (*this) * _rhs;
 
 	return (*this);
 }
 
-sav::VLN& sav::VLN::operator/=(const sav::VLN& _rhs)
-{
-	(*this) = (*this) / _rhs;
-
-	return (*this);
-}
-
-void sav::VLN::Normalize()
+void sav::Decimal::Normalize()
 {
 	for(int i = m_digits.size() - 1; i >= 0; i--)
 	{
