@@ -42,8 +42,13 @@ namespace sav
 			// Constructor for an initial unsigned 64-bit value.
 			explicit Decimal(std::uint64_t _initial);
 
+			// Constructor from string in base10, e.g. "1234".
+			explicit Decimal(const std::string& _fromString);
+
 			// Constructor for an empty value.
 			explicit Decimal();
+
+			DecimalStatus SetFromString(const std::string& _fromString);
 
 			std::optional<std::uint64_t> ToUInt64() const;
 
@@ -90,6 +95,8 @@ namespace sav
 			DecimalStatus m_status = DecimalStatus::Ok;
 
 			static const Decimal kDecimalWhichEqualUInt64Max;
+
+			static const Decimal kDecimalWhichEqualBase10ToAmplifyFrom;
 
 			/**
 			 * UnsafeIntegerPower - perform integer exponentiation without overflow checks.
@@ -141,11 +148,26 @@ namespace sav
 			static bool CompareFrames(const Decimal& _lhs, int _lhsFrame, const Decimal& _rhs);
 
 			/**
-			 * Amplify - Amplify decimal value by
-			 * @param _digits
+			 * AmplifyInBase256 - Amplify decimal value by
+			 * @param _digits in base256
 			 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
 			 */
-			void Amplify(int _digits);
+			Decimal& AmplifyInBase256(int _digits);
+
+			/**
+			 * AmplifyInBase10 - Amplify decimal value by
+			 * @param _digits in base10
+		 	* @example 0xFF (256) -> Amplify(1) -> 0x00'0A (2560) (little-endian)
+			 */
+			Decimal& AmplifyInBase10(int _digits);
+
+			/**
+			 * TODO IMPLEMENT
+			 * Internal procedure to perform exception-safe parsing without wrapping std::stoi.
+			 * @param _stringToCheck
+			 * @return DecimalStatus::Ok if Decimal can be constructed correctly from this string, otherwise appropriate error.
+			 */
+			static DecimalStatus CheckParseStringCoherency(const std::string& _stringToCheck);
 	};
 }
 

@@ -46,8 +46,17 @@ sav::Decimal::Decimal()
 	m_digits.push_back(0x00);
 }
 
+sav::Decimal::Decimal(const std::string& _fromString)
+{
+	SetFromString(_fromString);
+}
+
 const sav::Decimal sav::Decimal::kDecimalWhichEqualUInt64Max = sav::Decimal{
 	std::numeric_limits<std::uint64_t>::max()
+};
+
+const sav::Decimal sav::Decimal::kDecimalWhichEqualBase10ToAmplifyFrom = sav::Decimal{
+	sav::Decimal::kBase10
 };
 
 std::optional<std::uint64_t> sav::Decimal::ToUInt64() const
@@ -362,7 +371,7 @@ std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const s
 	}
 
 	Decimal mutableThis = (*this);
-	int currentFrameEnd = mutableThis.m_digits.size() - _rhs.m_digits.size() + 1 /* +1 means beyond the actual end */;
+	int currentFrameEnd = mutableThis.m_digits.size();
 	int currentFrameBegin = currentFrameEnd - _rhs.m_digits.size();
 	int loanedDigits = 0;
 	Decimal currentFrame;
@@ -393,7 +402,8 @@ std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const s
 
 		if(loanedDigits != 0)
 		{
-			result.Quotient.Amplify(loanedDigits);
+			result.Quotient.Normalize();
+			result.Quotient.AmplifyInBase256(loanedDigits);
 
 			currentFrameBegin -= loanedDigits;
 			loanedDigits = 0;
@@ -460,9 +470,13 @@ void sav::Decimal::Normalize()
 		if( m_digits[i] != 0x00 )
 		{
 			m_digits = std::vector<std::uint8_t>{m_digits.begin(), m_digits.begin() + i + 1};
-			break;
+			return;
 		}
 	}
+
+	// If internal array was like 0x00 0x00 0x00 ... 0x00
+	m_digits.clear();
+	m_digits.push_back(0x00);
 }
 
 bool sav::Decimal::EqualsZero() const
@@ -520,10 +534,52 @@ sav::Decimal& sav::Decimal::operator--(int)
 	return (*this);
 }
 
-void sav::Decimal::Amplify(int _digits)
+sav::Decimal& sav::Decimal::AmplifyInBase256(int _digits)
 {
 	for(int i = 0; i < _digits; i++)
 	{
 		m_digits.insert(m_digits.begin(), 0x00);
 	}
+
+	return (*this);
+}
+
+sav::Decimal& sav::Decimal::AmplifyInBase10(int _digits)
+{
+	for(int i = 0; i < _digits; i++)
+	{
+		this->operator*=(kDecimalWhichEqualBase10ToAmplifyFrom);
+	}
+
+	return (*this);
+}
+
+sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
+{
+	m_digits.clear();
+	m_digits.push_back(0x00);
+
+	int currentParseIndexFromEnd = 0;
+	while(currentParseIndexFromEnd < _fromString.size())
+	{
+		this->operator+=(
+			sav::Decimal{
+				static_cast<std::uint64_t>(std::stoi(
+					std::string{
+						_fromString.rbegin() + currentParseIndexFromEnd,
+						_fromString.rbegin() + currentParseIndexFromEnd + 1
+					}
+				))
+			}.AmplifyInBase10(currentParseIndexFromEnd)
+		);
+
+		currentParseIndexFromEnd++;
+	}
+
+	return DecimalStatus::Ok;
+}
+
+sav::DecimalStatus sav::Decimal::CheckParseStringCoherency(const std::string& _stringToCheck)
+{
+	return DecimalStatus::Error_Underflow;
 }
