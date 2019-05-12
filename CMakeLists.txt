@@ -14,5 +14,10 @@ set(${PROJECT_NAME}_SOURCES
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
+# testing
+add_subdirectory(submodule/googletest)
+
 add_executable(${PROJECT_NAME}_runtests src/tests/tests.cpp)
 target_link_libraries(${PROJECT_NAME}_runtests ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_runtests gtest gmock)
+
