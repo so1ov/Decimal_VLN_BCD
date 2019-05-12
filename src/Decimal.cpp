@@ -22,7 +22,10 @@
 
 #include "Decimal.h"
 
+#include "DecimalIntegerDivisionResult.h"
+
 #include <numeric>
+#include <algorithm>
 
 sav::Decimal::Decimal(std::uint64_t _initial)
 {
@@ -142,11 +145,26 @@ std::uint64_t sav::Decimal::UnsafeIntegerPower(std::uint64_t _base, std::uint64_
 	return result;
 }
 
-std::string sav::Decimal::ToBase10() const
+std::string sav::Decimal::ToString() const
 {
+	if(this->EqualsZero())
+	{
+		return "0";
+	}
 
+	auto intermediateResult = std::optional<DecimalIntegerDivisionResult>();
+	intermediateResult->Quotient = (*this);
+	std::string result;
 
-	return std::__cxx11::string();
+	do
+	{
+		intermediateResult = intermediateResult->Quotient / Decimal{kBase10};
+		result += std::to_string(intermediateResult->Remainder.ToUInt64().value());
+	}while(!intermediateResult->Quotient.EqualsZero());
+
+	std::reverse(result.begin(), result.end());
+
+	return result;
 }
 
 sav::Decimal::operator bool() const
@@ -328,14 +346,90 @@ sav::Decimal sav::Decimal::operator*(const sav::Decimal& _rhs) const
 	return result;
 }
 
-std::pair<sav::Decimal, sav::Decimal> sav::Decimal::operator/(const sav::Decimal& _rhs) const
+std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const sav::Decimal& _rhs) const
 {
-	Decimal resultQuotient;
-	Decimal resultRemainder;
+	if(_rhs.m_digits.size() == 1 && _rhs.m_digits[0] == 0x00)
+	{
+		return std::nullopt;
+	}
 
-	// TODO
+	DecimalIntegerDivisionResult result;
 
-	return std::pair<Decimal, Decimal>(resultQuotient, resultRemainder);
+	if((*this) < _rhs)
+	{
+		result.Remainder = (*this);
+		return {result};
+	}
+
+	Decimal mutableThis = (*this);
+	int currentFrameEnd = mutableThis.m_digits.size() - _rhs.m_digits.size() + 1 /* +1 means beyond the actual end */;
+	int currentFrameBegin = currentFrameEnd - _rhs.m_digits.size();
+	int loanedDigits = 0;
+	Decimal currentFrame;
+
+	bool first = true;
+	for(;;)
+	{
+		if(currentFrameBegin - loanedDigits < 0)
+		{
+			break;
+		}
+
+		currentFrame.m_digits =
+			std::vector<std::uint8_t>{
+				mutableThis.m_digits.begin() + currentFrameBegin - loanedDigits,
+				mutableThis.m_digits.begin() + currentFrameEnd
+			};
+
+		currentFrame.Normalize();
+
+		if(currentFrame < _rhs)
+		{
+			loanedDigits++;
+			continue;
+		}
+
+		//
+
+		if(loanedDigits != 0)
+		{
+			result.Quotient.Amplify(loanedDigits);
+
+			currentFrameBegin -= loanedDigits;
+			loanedDigits = 0;
+		}
+
+		while(currentFrame >= _rhs)
+		{
+			currentFrame -= _rhs;
+			result.Quotient++;
+		}
+
+		for(int i = currentFrameBegin; i < currentFrameEnd; i++)
+		{
+			if(i - currentFrameBegin >= currentFrame.m_digits.size())
+			{
+				mutableThis.m_digits[i] = 0x00;
+			}
+			else
+			{
+				mutableThis.m_digits[i] = currentFrame.m_digits[i - currentFrameBegin];
+			}
+		}
+
+		if(currentFrame.EqualsZero())
+		{
+			currentFrameEnd = currentFrameBegin;
+			loanedDigits += _rhs.m_digits.size();
+		}
+
+		first = false;
+	}
+
+	result.Remainder = currentFrame;
+	result.Remainder.Normalize();
+
+	return {result};
 }
 
 sav::Decimal& sav::Decimal::operator+=(const sav::Decimal& _rhs)
@@ -368,5 +462,68 @@ void sav::Decimal::Normalize()
 			m_digits = std::vector<std::uint8_t>{m_digits.begin(), m_digits.begin() + i + 1};
 			break;
 		}
+	}
+}
+
+bool sav::Decimal::EqualsZero() const
+{
+	if(m_digits.size() == 1 && m_digits[0] == 0x00)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool sav::Decimal::CompareFrames(const sav::Decimal& _lhs, int _lhsFrame, const sav::Decimal& _rhs)
+{
+	return _lhs.m_digits[_lhsFrame] > _rhs.m_digits[_lhsFrame];
+}
+
+sav::Decimal& sav::Decimal::operator++(int)
+{
+	for(int i = 0; i < m_digits.size(); i++)
+	{
+		if(m_digits[i] != std::numeric_limits<std::uint8_t>::max())
+		{
+			m_digits[i]++;
+			return (*this);
+		}
+		else
+		{
+			m_digits[i]++;
+		}
+	}
+
+	// 9999 -> 10000
+	std::fill(m_digits.begin(), m_digits.end(), 0x00);
+	m_digits.push_back(0x01);
+
+	return (*this);
+}
+
+sav::Decimal& sav::Decimal::operator--(int)
+{
+	for(int i = 0; i < m_digits.size(); i++)
+	{
+		if(m_digits[i] != std::numeric_limits<std::uint8_t>::min())
+		{
+			m_digits[i]--;
+			return (*this);
+		}
+		else
+		{
+			m_digits[i]--;
+		}
+	}
+
+	return (*this);
+}
+
+void sav::Decimal::Amplify(int _digits)
+{
+	for(int i = 0; i < _digits; i++)
+	{
+		m_digits.insert(m_digits.begin(), 0x00);
 	}
 }

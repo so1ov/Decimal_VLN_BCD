@@ -20,8 +20,8 @@
 // along with Decimal_VLN_BCD.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef DECIMAL_VLN_BCD_VLN_H
-#define DECIMAL_VLN_BCD_VLN_H
+#ifndef DECIMAL_VLN_BCD_DECIMAL_H
+#define DECIMAL_VLN_BCD_DECIMAL_H
 
 #include "DecimalStatus.h"
 
@@ -30,9 +30,12 @@
 #include <cstdint>
 #include <optional>
 #include <utility>
+#include <memory>
 
 namespace sav
 {
+	class DecimalIntegerDivisionResult;
+
 	class Decimal
 	{
 		public:
@@ -62,7 +65,7 @@ namespace sav
 			Decimal operator-(const Decimal& _rhs) const;
 			Decimal operator*(const Decimal& _rhs) const;
 			// in the result pair, first is quotient (integer part) and second is remainder
-			std::pair<Decimal, Decimal> operator/(const Decimal& _rhs) const;
+			std::optional<DecimalIntegerDivisionResult> operator/(const Decimal& _rhs) const;
 
 			// Mutable arithmetic operators (implementation depends on the immutable ones).
 			Decimal& operator+=(const Decimal& _rhs);
@@ -70,6 +73,10 @@ namespace sav
 			Decimal& operator*=(const Decimal& _rhs);
 			// Unable to perform in-place division without remainder loss. Use operator/ .
 			void operator/=(const Decimal& _rhs) = delete;
+
+			// Autonomous mutable arithmetic operators
+			Decimal& operator++(int);
+			Decimal& operator--(int);
 
 		protected:
 			enum
@@ -93,14 +100,53 @@ namespace sav
 			 */
 			static std::uint64_t UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index);
 
-			std::string ToBase10() const;
+			/**
+			 * ToString - convert stored decimal value to a base10 string, e.g. "1234".
+			 * @return value as base10
+			 */
+			std::string ToString() const;
 
 			/**
 			 * Normalize - remove unsignificant zeros.
 			 * (e.g. for base10 : 0001023 -> 1023)
 			 */
 			void Normalize();
+
+			/**
+			 * EqualsZero - return true if stored value equals zero, false otherwise.
+			 */
+			bool EqualsZero() const;
+
+			/**
+			 * CompareFrames - internal division utility function.
+			 * Unsafe and does not perform any checks!
+			 * Compares current division frame.
+			 * @param _lhs
+			 * @param _rhs, must be normalized (must not contain unsignificant zeros)
+			 * @return true if _lhs frame greater or equal than entire _rhs, false otherwise.
+			 *
+			 * @example
+			 * 1224 | 12
+			 * 12___| 102
+			 * 	 24
+			 * 	 24
+			 * 	  0
+			 *
+			 * The first frame in 1224 is 12, the second is 02, and the third is 24.
+			 * The first result is true, so we can perform intermediate subtraction,
+			 * the second is false, so multiply result by 10,
+			 * the third is true, so perform additional subtraction.
+			 *
+			 */
+			static bool CompareFrames(const Decimal& _lhs, int _lhsFrame, const Decimal& _rhs);
+
+			/**
+			 * Amplify - Amplify decimal value by
+			 * @param _digits
+			 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
+			 */
+			void Amplify(int _digits);
 	};
 }
 
-#endif //DECIMAL_VLN_BCD_VLN_H
+#endif //DECIMAL_VLN_BCD_DECIMAL_H
