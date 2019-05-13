@@ -210,7 +210,7 @@ sav::Decimal sav::Decimal::operator+(const sav::Decimal& _rhs) const
 		if(i < this->m_digits.size())
 		{
 			// overflow checking and set carry if needed
-			if( (accumulator + this->m_digits[i]) < accumulator)
+			if( (accumulator + static_cast<int>(this->m_digits[i])) > std::numeric_limits<std::uint8_t>::max())
 			{
 				carry = 1;
 			}
@@ -222,7 +222,7 @@ sav::Decimal sav::Decimal::operator+(const sav::Decimal& _rhs) const
 		if(i < _rhs.m_digits.size())
 		{
 			// overflow checking and set carry if needed
-			if( (accumulator + _rhs.m_digits[i]) < accumulator)
+			if( (accumulator + static_cast<int>(_rhs.m_digits[i])) > std::numeric_limits<std::uint8_t>::max())
 			{
 				carry = 1;
 			}
@@ -345,7 +345,13 @@ sav::Decimal sav::Decimal::operator*(const sav::Decimal& _rhs) const
 			//		...
 			std::uint16_t reg =  _rhs.m_digits[currentRhsDigit] * this->m_digits[currentThisDigit];
 			intermediateSum.m_digits.push_back(carry + static_cast<std::uint8_t>(reg & static_cast<std::uint8_t>(0xFF)));
-			carry = reg & static_cast<std::uint16_t>(0xFF'00);
+			carry = (reg & static_cast<std::uint16_t>(0xFF'00)) >> (sizeof(std::uint8_t) * CHAR_BIT * 1);
+		}
+
+		// If carry occured in the most significant digit
+		if(carry != 0x00)
+		{
+			intermediateSum.m_digits.push_back(carry);
 		}
 
 		// Accumulate intermediate sum
@@ -402,8 +408,8 @@ std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const s
 
 		if(loanedDigits != 0)
 		{
-			result.Quotient.Normalize();
 			result.Quotient.AmplifyInBase256(loanedDigits);
+			result.Quotient.Normalize();
 
 			currentFrameBegin -= loanedDigits;
 			loanedDigits = 0;
@@ -562,15 +568,19 @@ sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
 	int currentParseIndexFromEnd = 0;
 	while(currentParseIndexFromEnd < _fromString.size())
 	{
-		this->operator+=(
-			sav::Decimal{
-				static_cast<std::uint64_t>(std::stoi(
+		auto fu = sav::Decimal{
+			static_cast<std::uint64_t>(
+				std::stoi(
 					std::string{
 						_fromString.rbegin() + currentParseIndexFromEnd,
 						_fromString.rbegin() + currentParseIndexFromEnd + 1
 					}
-				))
-			}.AmplifyInBase10(currentParseIndexFromEnd)
+				)
+			)
+		}.AmplifyInBase10(currentParseIndexFromEnd);
+
+		this->operator+=(
+			fu
 		);
 
 		currentParseIndexFromEnd++;
