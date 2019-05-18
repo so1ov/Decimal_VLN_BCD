@@ -129,6 +129,118 @@ TEST_F(DecimalDivisionTests, DivideGreaterByExp1WithoutRemainder)
 	ASSERT_EQ(result->Remainder, sav::Decimal{"0"});
 }
 
+TEST_F(DecimalDivisionTests, DivideGreaterByExp1WithRemainder)
+{
+	m_decimal1 = DecimalTestWrapper{"1501"};
+	m_decimal2 = DecimalTestWrapper{"15"};
+
+	auto result = m_decimal1 / m_decimal2;
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result->Quotient, sav::Decimal{"100"});
+	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
+}
+
+TEST_F(DecimalDivisionTests, DivideGreaterBy10thExp2WithoutRemainder)
+{
+	m_decimal1 = DecimalTestWrapper{"15000"};
+	m_decimal2 = DecimalTestWrapper{"15"};
+
+	auto result = m_decimal1 / m_decimal2;
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result->Quotient, sav::Decimal{"1000"});
+	ASSERT_EQ(result->Remainder, sav::Decimal{"0"});
+}
+
+TEST_F(DecimalDivisionTests, DivideGreaterBy10thExp2WithRemainder)
+{
+	m_decimal1 = DecimalTestWrapper{"15001"};
+	m_decimal2 = DecimalTestWrapper{"15"};
+
+	auto result = m_decimal1 / m_decimal2;
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result->Quotient, sav::Decimal{"1000"});
+	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
+}
+
+TEST_F(DecimalDivisionTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
+{
+	// Assume this platform has int max value greater than divident
+	int divisor = 15;
+	int divident = divisor * (std::numeric_limits<std::uint8_t>::max() + 1);
+
+	m_decimal1 = DecimalTestWrapper{std::to_string(divident)};
+	m_decimal2 = DecimalTestWrapper{std::to_string(divisor)};
+
+	auto result = m_decimal1 / m_decimal2;
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result->Quotient, sav::Decimal{std::to_string(divident / divisor)});
+	ASSERT_EQ(result->Remainder, sav::Decimal{std::to_string(divident % divisor)});
+}
+
+class ArithmeticTests
+	:	public ::testing::Test
+{
+public:
+	void SetUp()
+	{
+		m_decimal1 = DecimalTestWrapper{};
+		m_decimal2 = DecimalTestWrapper{};
+	}
+
+	void TearDown()
+	{
+
+	}
+
+	DecimalTestWrapper m_decimal1;
+	DecimalTestWrapper m_decimal2;
+};
+
+TEST_F(ArithmeticTests, Addition_WithoutCarry)
+{
+	m_decimal1 = DecimalTestWrapper{"10"};
+	m_decimal2 = DecimalTestWrapper{"20"};
+
+	auto result = m_decimal1 + m_decimal2;
+	ASSERT_EQ(result, sav::Decimal{"30"});
+}
+
+TEST_F(ArithmeticTests, Addition_WithCarry)
+{
+	m_decimal1 = DecimalTestWrapper{"256"};
+	m_decimal2 = DecimalTestWrapper{"2"};
+
+	auto result = m_decimal1 + m_decimal2;
+	ASSERT_EQ(result, sav::Decimal{"258"});
+}
+
+TEST_F(ArithmeticTests, Addition_ZeroByZero)
+{
+	m_decimal1 = DecimalTestWrapper{"0"};
+	m_decimal2 = DecimalTestWrapper{"0"};
+
+	auto result = m_decimal1 + m_decimal2;
+	ASSERT_EQ(result, sav::Decimal{"0"});
+}
+
+TEST_F(ArithmeticTests, Addition_ToZero)
+{
+	m_decimal1 = DecimalTestWrapper{"0"};
+	m_decimal2 = DecimalTestWrapper{"20"};
+
+	auto result = m_decimal1 + m_decimal2;
+	ASSERT_EQ(result, sav::Decimal{"20"});
+}
+
+TEST_F(ArithmeticTests, Addition_ByZero)
+{
+	m_decimal1 = DecimalTestWrapper{"10"};
+	m_decimal2 = DecimalTestWrapper{"0"};
+
+	auto result = m_decimal1 + m_decimal2;
+	ASSERT_EQ(result, sav::Decimal{"10"});
+}
+
 int main()
 {
 	::testing::InitGoogleTest();

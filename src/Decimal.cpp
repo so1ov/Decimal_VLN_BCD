@@ -234,6 +234,11 @@ sav::Decimal sav::Decimal::operator+(const sav::Decimal& _rhs) const
 		result.m_digits.push_back(accumulator);
 	}
 
+	if(carry)
+	{
+		result.m_digits.push_back(0x01);
+	}
+
 	return result;
 }
 
@@ -256,7 +261,6 @@ sav::Decimal sav::Decimal::operator-(const sav::Decimal& _rhs) const
 	result = (*this);
 
 	std::uint8_t carry = 0;
-
 
 	for(int i = 0; i < result.m_digits.size(); i++)
 	{
@@ -387,6 +391,15 @@ std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const s
 	{
 		if(currentFrameBegin - loanedDigits < 0)
 		{
+			if(loanedDigits != 0)
+			{
+				result.Quotient.AmplifyInBase256(loanedDigits - 1);
+				result.Quotient.Normalize();
+
+				currentFrameBegin -= loanedDigits;
+				loanedDigits = 0;
+			}
+
 			break;
 		}
 
