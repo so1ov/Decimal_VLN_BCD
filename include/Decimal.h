@@ -131,11 +131,11 @@ namespace sav
 			 */
 			bool EqualsZero() const;
 
-		/**
-		 * AmplifyInBase256 - Amplify decimal value by
-		 * @param _digits in base256
-		 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
-		 */
+			/**
+		 	 * AmplifyInBase256 - Amplify decimal value by
+		 	 * @param _digits in base256
+		 	 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
+		 	 */
 			Decimal& AmplifyInBase256(int _digits);
 
 			/**
