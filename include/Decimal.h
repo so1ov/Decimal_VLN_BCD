@@ -75,7 +75,7 @@ namespace sav
 			/**
 			 * DivideAndRoundInBase10 - divide and round in base10 using 4/5 rule.
 			 * @param _divisor
-			 * @return
+			 * @return rounded result
 			 */
 			Decimal DivideAndRoundInBase10(const Decimal& _divisor) const;
 
