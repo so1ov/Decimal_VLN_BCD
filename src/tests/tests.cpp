@@ -255,35 +255,57 @@ public:
 
 TEST_F(VATTests, CalculateVATForOnePosition)
 {
-	// One product, which costs 10000 copecks = 100 roubles. VAT 20 included.
-	sav::Decimal position = sav::Decimal{"10000"};
+	std::vector<std::pair<std::string, std::string>> pricesWithVatIncludedAndTheirVats = {
+		{"10000", "1667"},
+		{"20000", "3333"},
+		{"30000", "5000"},
+		{"40000", "6667"},
+		{"50000", "8333"},
+	};
 
-	// calculating VAT
-	sav::Decimal intermediate = position * k20;
-	auto result = intermediate.DivideAndRoundInBase10(k120);
+	for(auto& it : pricesWithVatIncludedAndTheirVats)
+	{
+		// One product, which costs 10000 copecks = 100 roubles. VAT 20 included.
+		sav::Decimal position = sav::Decimal{it.first};
 
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result.value(), sav::Decimal{"1667"});
+		// calculating VAT
+		sav::Decimal intermediate = position * k20;
+		auto result = intermediate.DivideAndRoundInBase10(k120);
+
+		ASSERT_TRUE(result.has_value());
+		ASSERT_EQ(result.value(), sav::Decimal{it.second});
+	}
 }
 
 TEST_F(VATTests, CalculateVATForEntireTwoPositions)
 {
-	// One product x2, which costs 5000 copecks * 2 = 10000 copecks  = 100 roubles. VAT 20 included.
-	sav::Decimal position1 = sav::Decimal{"5000"};
-	sav::Decimal position2 = sav::Decimal{"5000"};
+	std::vector<std::pair<std::string, std::string>> pricesWithVatIncludedAndTheirX2Vats = {
+		{"10000", "3334"},
+		{"20000", "6666"},
+		{"30000", "10000"},
+		{"40000", "13334"},
+		{"50000", "16666"},
+	};
 
-	// calculating VAT for position1
-	sav::Decimal intermediate1 = position1 * k20;
-	auto result1 = intermediate1.DivideAndRoundInBase10(k120);
-	ASSERT_TRUE(result1.has_value());
+	for(auto& it : pricesWithVatIncludedAndTheirX2Vats)
+	{
+		// One product x2, which costs 10000 copecks * 2 = 20000 copecks  = 200 roubles. VAT 20 included.
+		sav::Decimal position1 = sav::Decimal{it.first};
+		sav::Decimal position2 = sav::Decimal{it.first};
 
-	// calculating VAT for position2
-	sav::Decimal intermediate2 = position2 * k20;
-	auto result2 = intermediate2.DivideAndRoundInBase10(k120);
-	ASSERT_TRUE(result2.has_value());
+		// calculating VAT for position1
+		sav::Decimal intermediate1 = position1 * k20;
+		auto result1 = intermediate1.DivideAndRoundInBase10(k120);
+		ASSERT_TRUE(result1.has_value());
 
-	auto total = result1.value() + result2.value();
-	ASSERT_EQ(total, sav::Decimal{"1666"});
+		// calculating VAT for position2
+		sav::Decimal intermediate2 = position2 * k20;
+		auto result2 = intermediate2.DivideAndRoundInBase10(k120);
+		ASSERT_TRUE(result2.has_value());
+
+		auto total = result1.value() + result2.value();
+		ASSERT_EQ(total, sav::Decimal{it.second});
+	}
 }
 
 int main()
