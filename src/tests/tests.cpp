@@ -136,9 +136,9 @@ TEST_F(ArithmeticTests, DivideLess)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{});
-	ASSERT_EQ(result->Remainder, m_decimal1);
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{});
+	ASSERT_EQ(result.Remainder, m_decimal1);
 }
 
 TEST_F(ArithmeticTests, DivideEqual)
@@ -147,9 +147,9 @@ TEST_F(ArithmeticTests, DivideEqual)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"1"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"0"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"1"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
 }
 
 TEST_F(ArithmeticTests, DivideGreater)
@@ -158,9 +158,9 @@ TEST_F(ArithmeticTests, DivideGreater)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"1"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"1"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
 }
 
 TEST_F(ArithmeticTests, DivideGreaterByExp1WithoutRemainder)
@@ -169,9 +169,9 @@ TEST_F(ArithmeticTests, DivideGreaterByExp1WithoutRemainder)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"100"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"0"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"100"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
 }
 
 TEST_F(ArithmeticTests, DivideGreaterByExp1WithRemainder)
@@ -180,9 +180,9 @@ TEST_F(ArithmeticTests, DivideGreaterByExp1WithRemainder)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"100"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"100"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
 }
 
 TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithoutRemainder)
@@ -191,9 +191,9 @@ TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithoutRemainder)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"1000"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"0"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"1000"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
 }
 
 TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithRemainder)
@@ -202,9 +202,9 @@ TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithRemainder)
 	m_decimal2 = DecimalTestWrapper{"15"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"1000"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"1000"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
 }
 
 TEST_F(ArithmeticTests, DivideWithCarryAndWithRemainder)
@@ -213,9 +213,9 @@ TEST_F(ArithmeticTests, DivideWithCarryAndWithRemainder)
 	m_decimal2 = DecimalTestWrapper{"120"};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{"833"});
-	ASSERT_EQ(result->Remainder, sav::Decimal{"40"});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{"833"});
+	ASSERT_EQ(result.Remainder, sav::Decimal{"40"});
 }
 
 TEST_F(ArithmeticTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
@@ -228,9 +228,9 @@ TEST_F(ArithmeticTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
 	m_decimal2 = DecimalTestWrapper{std::to_string(divisor)};
 
 	auto result = m_decimal1 / m_decimal2;
-	ASSERT_TRUE(result.has_value());
-	ASSERT_EQ(result->Quotient, sav::Decimal{std::to_string(divident / divisor)});
-	ASSERT_EQ(result->Remainder, sav::Decimal{std::to_string(divident % divisor)});
+	ASSERT_TRUE(result);
+	ASSERT_EQ(result.Quotient, sav::Decimal{std::to_string(divident / divisor)});
+	ASSERT_EQ(result.Remainder, sav::Decimal{std::to_string(divident % divisor)});
 }
 
 class VATTests
@@ -272,8 +272,8 @@ TEST_F(VATTests, CalculateVATForOnePosition)
 		sav::Decimal intermediate = position * k20;
 		auto result = intermediate.DivideAndRoundInBase10(k120);
 
-		ASSERT_TRUE(result.has_value());
-		ASSERT_EQ(result.value(), sav::Decimal{it.second});
+		ASSERT_TRUE(result);
+		ASSERT_EQ(result, sav::Decimal{it.second});
 	}
 }
 
@@ -296,14 +296,14 @@ TEST_F(VATTests, CalculateVATForEntireTwoPositions)
 		// calculating VAT for position1
 		sav::Decimal intermediate1 = position1 * k20;
 		auto result1 = intermediate1.DivideAndRoundInBase10(k120);
-		ASSERT_TRUE(result1.has_value());
+		ASSERT_TRUE(result1);
 
 		// calculating VAT for position2
 		sav::Decimal intermediate2 = position2 * k20;
 		auto result2 = intermediate2.DivideAndRoundInBase10(k120);
-		ASSERT_TRUE(result2.has_value());
+		ASSERT_TRUE(result2);
 
-		auto total = result1.value() + result2.value();
+		auto total = result1 + result2;
 		ASSERT_EQ(total, sav::Decimal{it.second});
 	}
 }

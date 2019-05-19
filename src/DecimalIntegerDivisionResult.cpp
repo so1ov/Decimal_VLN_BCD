@@ -20,34 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef DECIMAL_VLN_BCD_DECIMALINTEGERDIVISIONRESULT_H
-#define DECIMAL_VLN_BCD_DECIMALINTEGERDIVISIONRESULT_H
+#include <DecimalIntegerDivisionResult.h>
 
-#include "Decimal.h"
-
-namespace sav
+sav::DecimalIntegerDivisionResult::operator bool() const
 {
-	/**
-	 * @class DecimalIntegerDivisionResult
-	 * Division result class - quotient, remainder and division status.
-	 */
-	class DecimalIntegerDivisionResult
-	{
-		friend class Decimal;
-
-	public:
-		// Returns true on coherent division, false otherwise (for example, if divided by zero)
-		explicit operator bool() const;
-
-		// Quotient (integer part of the division result)
-		Decimal Quotient;
-
-		// Remainder
-		Decimal Remainder;
-
-	protected:
-		DecimalStatus m_divisionStatus = DecimalStatus::Ok;
-	};
+	return m_divisionStatus == DecimalStatus::Ok;
 }
 
-#endif //DECIMAL_VLN_BCD_DECIMALINTEGERDIVISIONRESULT_H

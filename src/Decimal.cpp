@@ -365,19 +365,20 @@ sav::Decimal sav::Decimal::operator*(const sav::Decimal& _rhs) const
 	return result;
 }
 
-std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const sav::Decimal& _rhs) const
+sav::DecimalIntegerDivisionResult sav::Decimal::operator/(const sav::Decimal& _rhs) const
 {
+	DecimalIntegerDivisionResult result;
+
 	if(_rhs.m_digits.size() == 1 && _rhs.m_digits[0] == 0x00)
 	{
-		return std::nullopt;
+		result.m_divisionStatus = DecimalStatus::Error_Underflow;
+		return result;
 	}
-
-	DecimalIntegerDivisionResult result;
 
 	if((*this) < _rhs)
 	{
 		result.Remainder = (*this);
-		return {result};
+		return result;
 	}
 
 	Decimal mutableThis = (*this);
@@ -458,7 +459,7 @@ std::optional<sav::DecimalIntegerDivisionResult> sav::Decimal::operator/(const s
 	result.Remainder = currentFrame;
 	result.Remainder.Normalize();
 
-	return {result};
+	return result;
 }
 
 sav::Decimal& sav::Decimal::operator+=(const sav::Decimal& _rhs)
@@ -550,6 +551,7 @@ sav::Decimal& sav::Decimal::operator--(int)
 		}
 	}
 
+	(*this).m_status = DecimalStatus::Error_Underflow;
 	return (*this);
 }
 
@@ -581,19 +583,17 @@ sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
 	int currentParseIndexFromEnd = 0;
 	while(currentParseIndexFromEnd < _fromString.size())
 	{
-		auto fu = sav::Decimal{
-			static_cast<unsigned int>(
-				std::stoi(
-					std::string{
-						_fromString.rbegin() + currentParseIndexFromEnd,
-						_fromString.rbegin() + currentParseIndexFromEnd + 1
-					}
-				)
-			)
-		}.AmplifyInBase10(currentParseIndexFromEnd);
-
 		this->operator+=(
-			fu
+			sav::Decimal{
+				static_cast<unsigned int>(
+					std::stoi(
+						std::string{
+							_fromString.rbegin() + currentParseIndexFromEnd,
+							_fromString.rbegin() + currentParseIndexFromEnd + 1
+						}
+					)
+				)
+			}.AmplifyInBase10(currentParseIndexFromEnd)
 		);
 
 		currentParseIndexFromEnd++;
@@ -607,19 +607,23 @@ sav::DecimalStatus sav::Decimal::CheckParseStringCoherency(const std::string& _s
 	return DecimalStatus::Error_Underflow;
 }
 
-std::optional<sav::Decimal> sav::Decimal::DivideAndRoundInBase10(const sav::Decimal& _divisor) const
+sav::Decimal sav::Decimal::DivideAndRoundInBase10(const sav::Decimal& _divisor) const
 {
+	sav::Decimal result;
+
 	auto divisionResult = (*this) / _divisor;
-	if(divisionResult.has_value() == false)
+	if(!divisionResult)
 	{
 		// Seems to be division by zero, nothing to round.
-		return std::nullopt;
+		result.m_status = divisionResult.m_divisionStatus;
+		return result;
 	}
 
 	// Division occured without remainder, nothing to round.
-	if(divisionResult->Remainder.EqualsZero())
+	if(divisionResult.Remainder.EqualsZero())
 	{
-		return divisionResult->Quotient;
+		result = divisionResult.Quotient;
+		return result;
 	}
 
 	/**
@@ -629,12 +633,17 @@ std::optional<sav::Decimal> sav::Decimal::DivideAndRoundInBase10(const sav::Deci
 	 *                  ^ We need the first digit after .
 	 *                  (6 > 5) -> (1666.666... -> 1667)
 	 */
-	auto intermediate = divisionResult->Remainder / kDecimalWhichEqualBase10;
-	auto firstDigitToCompleteRounding = (*intermediate->Quotient.ToUInt());
-	if(firstDigitToCompleteRounding >= 5)
+	auto intermediate = divisionResult.Remainder / kDecimalWhichEqualBase10;
+	auto firstDigitToCompleteRounding = intermediate.Quotient.ToUInt();
+	if(!firstDigitToCompleteRounding)
 	{
-		divisionResult->Quotient++;
+		throw;
+	}
+	if(firstDigitToCompleteRounding.value() >= 5)
+	{
+		divisionResult.Quotient++;
 	}
 
-	return {divisionResult->Quotient};
+	result = divisionResult.Quotient;
+	return result;
 }
