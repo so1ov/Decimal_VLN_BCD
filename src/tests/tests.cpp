@@ -82,7 +82,7 @@ TEST_F(ArithmeticTests, Addition_WithoutCarry)
 	m_decimal2 = DecimalTestWrapper{"20"};
 
 	auto result = m_decimal1 + m_decimal2;
-	ASSERT_EQ(result, sav::Decimal{"30"});
+	ASSERT_EQ(result.ToString(), "30");
 }
 
 TEST_F(ArithmeticTests, Addition_WithCarry)
@@ -91,7 +91,7 @@ TEST_F(ArithmeticTests, Addition_WithCarry)
 	m_decimal2 = DecimalTestWrapper{"2"};
 
 	auto result = m_decimal1 + m_decimal2;
-	ASSERT_EQ(result, sav::Decimal{"258"});
+	ASSERT_EQ(result.ToString(), "258");
 }
 
 TEST_F(ArithmeticTests, Addition_ZeroByZero)
@@ -100,7 +100,7 @@ TEST_F(ArithmeticTests, Addition_ZeroByZero)
 	m_decimal2 = DecimalTestWrapper{"0"};
 
 	auto result = m_decimal1 + m_decimal2;
-	ASSERT_EQ(result, sav::Decimal{"0"});
+	ASSERT_EQ(result.ToString(), "0");
 }
 
 TEST_F(ArithmeticTests, Addition_ToZero)
@@ -109,7 +109,7 @@ TEST_F(ArithmeticTests, Addition_ToZero)
 	m_decimal2 = DecimalTestWrapper{"20"};
 
 	auto result = m_decimal1 + m_decimal2;
-	ASSERT_EQ(result, sav::Decimal{"20"});
+	ASSERT_EQ(result.ToString(), "20");
 }
 
 TEST_F(ArithmeticTests, Addition_ByZero)
@@ -118,7 +118,7 @@ TEST_F(ArithmeticTests, Addition_ByZero)
 	m_decimal2 = DecimalTestWrapper{"0"};
 
 	auto result = m_decimal1 + m_decimal2;
-	ASSERT_EQ(result, sav::Decimal{"10"});
+	ASSERT_EQ(result.ToString(), "10");
 }
 
 TEST_F(ArithmeticTests, DivideByZero)
@@ -137,7 +137,7 @@ TEST_F(ArithmeticTests, DivideLess)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{});
+	ASSERT_TRUE(result.Quotient.EqualsZero());
 	ASSERT_EQ(result.Remainder, m_decimal1);
 }
 
@@ -148,8 +148,8 @@ TEST_F(ArithmeticTests, DivideEqual)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"1"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
+	ASSERT_EQ(result.Quotient.ToString(), "1");
+	ASSERT_EQ(result.Remainder.ToString(), "0");
 }
 
 TEST_F(ArithmeticTests, DivideGreater)
@@ -159,8 +159,8 @@ TEST_F(ArithmeticTests, DivideGreater)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"1"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
+	ASSERT_EQ(result.Quotient.ToString(), "1");
+	ASSERT_EQ(result.Remainder.ToString(), "1");
 }
 
 TEST_F(ArithmeticTests, DivideGreaterByExp1WithoutRemainder)
@@ -170,8 +170,8 @@ TEST_F(ArithmeticTests, DivideGreaterByExp1WithoutRemainder)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"100"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
+	ASSERT_EQ(result.Quotient.ToString(), "100");
+	ASSERT_EQ(result.Remainder.ToString(), "0");
 }
 
 TEST_F(ArithmeticTests, DivideGreaterByExp1WithRemainder)
@@ -181,8 +181,8 @@ TEST_F(ArithmeticTests, DivideGreaterByExp1WithRemainder)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"100"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
+	ASSERT_EQ(result.Quotient.ToString(), "100");
+	ASSERT_EQ(result.Remainder.ToString(), "1");
 }
 
 TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithoutRemainder)
@@ -192,8 +192,8 @@ TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithoutRemainder)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"1000"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"0"});
+	ASSERT_EQ(result.Quotient.ToString(), "1000");
+	ASSERT_EQ(result.Remainder.ToString(), "0");
 }
 
 TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithRemainder)
@@ -203,8 +203,8 @@ TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithRemainder)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"1000"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"1"});
+	ASSERT_EQ(result.Quotient.ToString(), "1000");
+	ASSERT_EQ(result.Remainder.ToString(), "1");
 }
 
 TEST_F(ArithmeticTests, DivideWithCarryAndWithRemainder)
@@ -214,8 +214,8 @@ TEST_F(ArithmeticTests, DivideWithCarryAndWithRemainder)
 
 	auto result = m_decimal1 / m_decimal2;
 	ASSERT_TRUE(result);
-	ASSERT_EQ(result.Quotient, sav::Decimal{"833"});
-	ASSERT_EQ(result.Remainder, sav::Decimal{"40"});
+	ASSERT_EQ(result.Quotient.ToString(), "833");
+	ASSERT_EQ(result.Remainder.ToString(), "40");
 }
 
 TEST_F(ArithmeticTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
@@ -273,7 +273,7 @@ TEST_F(VATTests, CalculateVATForOnePosition)
 		auto result = intermediate.DivideAndRoundInBase10(k120);
 
 		ASSERT_TRUE(result);
-		ASSERT_EQ(result, sav::Decimal{it.second});
+		ASSERT_EQ(result.ToString(), it.second);
 	}
 }
 
@@ -304,7 +304,7 @@ TEST_F(VATTests, CalculateVATForEntireTwoPositions)
 		ASSERT_TRUE(result2);
 
 		auto total = result1 + result2;
-		ASSERT_EQ(total, sav::Decimal{it.second});
+		ASSERT_EQ(total.ToString(), it.second);
 	}
 }
 
