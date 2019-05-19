@@ -207,6 +207,17 @@ TEST_F(ArithmeticTests, DivideGreaterBy10thExp2WithRemainder)
 	ASSERT_EQ(result->Remainder, sav::Decimal{"1"});
 }
 
+TEST_F(ArithmeticTests, DivideWithCarryAndWithRemainder)
+{
+	m_decimal1 = DecimalTestWrapper{"100000"};
+	m_decimal2 = DecimalTestWrapper{"120"};
+
+	auto result = m_decimal1 / m_decimal2;
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result->Quotient, sav::Decimal{"833"});
+	ASSERT_EQ(result->Remainder, sav::Decimal{"40"});
+}
+
 TEST_F(ArithmeticTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
 {
 	// Assume this platform has int max value greater than divident
@@ -220,6 +231,59 @@ TEST_F(ArithmeticTests, DivideBinaryGreaterByBinaryExp1WithoutRemainder)
 	ASSERT_TRUE(result.has_value());
 	ASSERT_EQ(result->Quotient, sav::Decimal{std::to_string(divident / divisor)});
 	ASSERT_EQ(result->Remainder, sav::Decimal{std::to_string(divident % divisor)});
+}
+
+class VATTests
+	:	public ::testing::Test
+{
+public:
+	void SetUp()
+	{
+
+	}
+
+	void TearDown()
+	{
+
+	}
+
+	sav::Decimal k10 = sav::Decimal{"10"};
+	sav::Decimal k20 = sav::Decimal{"20"};
+	sav::Decimal k110 = sav::Decimal{"110"};
+	sav::Decimal k120 = sav::Decimal{"120"};
+};
+
+TEST_F(VATTests, CalculateVATForOnePosition)
+{
+	// One product, which costs 10000 copecks = 100 roubles. VAT 20 included.
+	sav::Decimal position = sav::Decimal{"10000"};
+
+	// calculating VAT
+	sav::Decimal intermediate = position * k20;
+	auto result = intermediate.DivideAndRoundInBase10(k120);
+
+	ASSERT_TRUE(result.has_value());
+	ASSERT_EQ(result.value(), sav::Decimal{"1667"});
+}
+
+TEST_F(VATTests, CalculateVATForEntireTwoPositions)
+{
+	// One product x2, which costs 5000 copecks * 2 = 10000 copecks  = 100 roubles. VAT 20 included.
+	sav::Decimal position1 = sav::Decimal{"5000"};
+	sav::Decimal position2 = sav::Decimal{"5000"};
+
+	// calculating VAT for position1
+	sav::Decimal intermediate1 = position1 * k20;
+	auto result1 = intermediate1.DivideAndRoundInBase10(k120);
+	ASSERT_TRUE(result1.has_value());
+
+	// calculating VAT for position2
+	sav::Decimal intermediate2 = position2 * k20;
+	auto result2 = intermediate2.DivideAndRoundInBase10(k120);
+	ASSERT_TRUE(result2.has_value());
+
+	auto total = result1.value() + result2.value();
+	ASSERT_EQ(total, sav::Decimal{"1666"});
 }
 
 int main()

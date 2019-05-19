@@ -72,6 +72,13 @@ namespace sav
 			// in the result pair, first is quotient (integer part) and second is remainder
 			std::optional<DecimalIntegerDivisionResult> operator/(const Decimal& _rhs) const;
 
+			/**
+			 * DivideAndRoundInBase10 - divide and round in base10 using 4/5 rule.
+			 * @param _divisor
+			 * @return
+			 */
+			std::optional<Decimal> DivideAndRoundInBase10(const Decimal& _divisor) const;
+
 			// Mutable arithmetic operators (implementation depends on the immutable ones).
 			Decimal& operator+=(const Decimal& _rhs);
 			Decimal& operator-=(const Decimal& _rhs);
@@ -96,7 +103,7 @@ namespace sav
 
 			static const Decimal kDecimalWhichEqualUInt64Max;
 
-			static const Decimal kDecimalWhichEqualBase10ToAmplifyFrom;
+			static const Decimal kDecimalWhichEqualBase10;
 
 			/**
 			 * UnsafeIntegerPower - perform integer exponentiation without overflow checks.

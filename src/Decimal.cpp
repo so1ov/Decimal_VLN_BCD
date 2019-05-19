@@ -55,7 +55,7 @@ const sav::Decimal sav::Decimal::kDecimalWhichEqualUInt64Max = sav::Decimal{
 	std::numeric_limits<std::uint64_t>::max()
 };
 
-const sav::Decimal sav::Decimal::kDecimalWhichEqualBase10ToAmplifyFrom = sav::Decimal{
+const sav::Decimal sav::Decimal::kDecimalWhichEqualBase10 = sav::Decimal{
 	sav::Decimal::kBase10
 };
 
@@ -567,7 +567,7 @@ sav::Decimal& sav::Decimal::AmplifyInBase10(int _digits)
 {
 	for(int i = 0; i < _digits; i++)
 	{
-		this->operator*=(kDecimalWhichEqualBase10ToAmplifyFrom);
+		this->operator*=(kDecimalWhichEqualBase10);
 	}
 
 	return (*this);
@@ -605,4 +605,36 @@ sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
 sav::DecimalStatus sav::Decimal::CheckParseStringCoherency(const std::string& _stringToCheck)
 {
 	return DecimalStatus::Error_Underflow;
+}
+
+std::optional<sav::Decimal> sav::Decimal::DivideAndRoundInBase10(const sav::Decimal& _divisor) const
+{
+	auto divisionResult = (*this) / _divisor;
+	if(divisionResult.has_value() == false)
+	{
+		// Seems to be division by zero, nothing to round.
+		return std::nullopt;
+	}
+
+	// Division occured without remainder, nothing to round.
+	if(divisionResult->Remainder.EqualsZero())
+	{
+		return divisionResult->Quotient;
+	}
+
+	/**
+	 * To properly round in base10 using 4/5 rule, determine the most significant digit in the rounded part.
+	 * Example:
+	 * 10000 / 6 = 1666.666...
+	 *                  ^ We need the first digit after .
+	 *                  (6 > 5) -> (1666.666... -> 1667)
+	 */
+	auto intermediate = divisionResult->Remainder / kDecimalWhichEqualBase10;
+	auto firstDigitToCompleteRounding = (*intermediate->Quotient.ToUInt64());
+	if(firstDigitToCompleteRounding >= 5)
+	{
+		divisionResult->Quotient++;
+	}
+
+	return {divisionResult->Quotient};
 }
