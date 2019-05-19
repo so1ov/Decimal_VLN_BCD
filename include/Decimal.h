@@ -96,6 +96,11 @@ namespace sav
 			Decimal& operator++(int);
 			Decimal& operator--(int);
 
+			/**
+		 	 * EqualsZero - return true if stored value equals zero, false otherwise.
+		 	 */
+			bool EqualsZero() const;
+
 		protected:
 			enum
 			{
@@ -125,11 +130,6 @@ namespace sav
 			 * (e.g. for base10 : 0001023 -> 1023)
 			 */
 			void Normalize();
-
-			/**
-			 * EqualsZero - return true if stored value equals zero, false otherwise.
-			 */
-			bool EqualsZero() const;
 
 			/**
 		 	 * AmplifyInBase256 - Amplify decimal value by
