@@ -371,7 +371,7 @@ sav::DecimalIntegerDivisionResult sav::Decimal::operator/(const sav::Decimal& _r
 
 	if(_rhs.m_digits.size() == 1 && _rhs.m_digits[0] == 0x00)
 	{
-		result.m_divisionStatus = DecimalStatus::Error_Underflow;
+		result.m_divisionStatus = DecimalStatus::Error_DividedByZero;
 		return result;
 	}
 
