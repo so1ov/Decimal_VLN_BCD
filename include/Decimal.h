@@ -39,8 +39,8 @@ namespace sav
 	class Decimal
 	{
 		public:
-			// Constructor for an initial unsigned 64-bit value.
-			explicit Decimal(std::uint64_t _initial);
+			// Constructor for an initial unsigned value.
+			explicit Decimal(unsigned int _initial);
 
 			// Constructor from string in base10, e.g. "1234".
 			explicit Decimal(const std::string& _fromString);
@@ -50,7 +50,7 @@ namespace sav
 
 			DecimalStatus SetFromString(const std::string& _fromString);
 
-			std::optional<std::uint64_t> ToUInt64() const;
+			std::optional<unsigned int> ToUInt() const;
 
 			// Returns false if Decimal integrity has been violated (e.g. divided by zero), true otherwise
 			explicit operator bool() const;
@@ -101,18 +101,18 @@ namespace sav
 
 			DecimalStatus m_status = DecimalStatus::Ok;
 
-			static const Decimal kDecimalWhichEqualUInt64Max;
+			static const Decimal kDecimalWhichEqualUnsignedIntMax;
 
 			static const Decimal kDecimalWhichEqualBase10;
 
 			/**
 			 * UnsafeIntegerPower - perform integer exponentiation without overflow checks.
-			 * For internal use in ToUInt64() function.
+			 * For internal use in ToUInt() function.
 			 * @param _base
 			 * @param _index
 			 * @return strictly integer result
 			 */
-			static std::uint64_t UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index);
+			static unsigned int UnsafeIntegerPower(unsigned int _base, unsigned int _index);
 
 			/**
 			 * ToString - convert stored decimal value to a base10 string, e.g. "1234".

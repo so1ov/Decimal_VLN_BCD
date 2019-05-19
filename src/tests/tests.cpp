@@ -39,8 +39,8 @@ public:
 
 	}
 
-	DecimalTestWrapper(std::uint64_t _initialUint64t)
-		:	sav::Decimal(_initialUint64t)
+	DecimalTestWrapper(unsigned int _initialUint)
+		:	sav::Decimal(_initialUint)
 	{
 
 	}

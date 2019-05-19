@@ -27,7 +27,7 @@
 #include <numeric>
 #include <algorithm>
 
-sav::Decimal::Decimal(std::uint64_t _initial)
+sav::Decimal::Decimal(unsigned int _initial)
 {
 	for(;;)
 	{
@@ -51,22 +51,22 @@ sav::Decimal::Decimal(const std::string& _fromString)
 	SetFromString(_fromString);
 }
 
-const sav::Decimal sav::Decimal::kDecimalWhichEqualUInt64Max = sav::Decimal{
-	std::numeric_limits<std::uint64_t>::max()
+const sav::Decimal sav::Decimal::kDecimalWhichEqualUnsignedIntMax = sav::Decimal{
+	std::numeric_limits<unsigned int>::max()
 };
 
 const sav::Decimal sav::Decimal::kDecimalWhichEqualBase10 = sav::Decimal{
 	sav::Decimal::kBase10
 };
 
-std::optional<std::uint64_t> sav::Decimal::ToUInt64() const
+std::optional<unsigned int> sav::Decimal::ToUInt() const
 {
-	if( (*this) > kDecimalWhichEqualUInt64Max)
+	if( (*this) > kDecimalWhichEqualUnsignedIntMax)
 	{
 		return std::nullopt;
 	}
 
-	std::uint64_t result = 0;
+	unsigned int result = 0;
 
 	// m_digits == 0x02 0x00 0x01 // 65538
 	// result = 0x02 * 256^0 + 0x00 * 256^1 + 0x01 * 256^2 == 2 + 0 + 65536 == 65538
@@ -75,7 +75,7 @@ std::optional<std::uint64_t> sav::Decimal::ToUInt64() const
 		result += m_digits[i] * UnsafeIntegerPower(kBase256, i);
 	}
 
-	return std::optional<std::uint64_t>{result};
+	return std::optional<unsigned int>{result};
 }
 
 bool sav::Decimal::operator==(const sav::Decimal& _rhs) const
@@ -129,7 +129,7 @@ bool sav::Decimal::operator>=(const sav::Decimal& _rhs) const
 	return (!((*this) < _rhs)) || ((*this) == _rhs);
 }
 
-std::uint64_t sav::Decimal::UnsafeIntegerPower(std::uint64_t _base, std::uint64_t _index)
+unsigned int sav::Decimal::UnsafeIntegerPower(unsigned int _base, unsigned int _index)
 {
 	if(_index == 0)
 	{
@@ -141,10 +141,10 @@ std::uint64_t sav::Decimal::UnsafeIntegerPower(std::uint64_t _base, std::uint64_
 		throw;
 	}
 
-	std::uint64_t result = 0;
+	unsigned int result = 0;
 
-	std::uint64_t accum = 1;
-	for(std::uint64_t i = 0; i < _index; i++)
+	unsigned int accum = 1;
+	for(unsigned int i = 0; i < _index; i++)
 	{
 		accum *= _base;
 	}
@@ -168,7 +168,7 @@ std::string sav::Decimal::ToString() const
 	do
 	{
 		intermediateResult = intermediateResult->Quotient / Decimal{kBase10};
-		result += std::to_string(intermediateResult->Remainder.ToUInt64().value());
+		result += std::to_string(intermediateResult->Remainder.ToUInt().value());
 	}while(!intermediateResult->Quotient.EqualsZero());
 
 	std::reverse(result.begin(), result.end());
@@ -582,7 +582,7 @@ sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
 	while(currentParseIndexFromEnd < _fromString.size())
 	{
 		auto fu = sav::Decimal{
-			static_cast<std::uint64_t>(
+			static_cast<unsigned int>(
 				std::stoi(
 					std::string{
 						_fromString.rbegin() + currentParseIndexFromEnd,
@@ -630,7 +630,7 @@ std::optional<sav::Decimal> sav::Decimal::DivideAndRoundInBase10(const sav::Deci
 	 *                  (6 > 5) -> (1666.666... -> 1667)
 	 */
 	auto intermediate = divisionResult->Remainder / kDecimalWhichEqualBase10;
-	auto firstDigitToCompleteRounding = (*intermediate->Quotient.ToUInt64());
+	auto firstDigitToCompleteRounding = (*intermediate->Quotient.ToUInt());
 	if(firstDigitToCompleteRounding >= 5)
 	{
 		divisionResult->Quotient++;
