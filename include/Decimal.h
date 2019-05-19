@@ -52,6 +52,12 @@ namespace sav
 
 			std::optional<unsigned int> ToUInt() const;
 
+			/**
+			 * ToString - convert stored decimal value to a base10 string, e.g. "1234".
+		 	 * @return value as base10
+		 	 */
+			std::string ToString() const;
+
 			// Returns false if Decimal integrity has been violated (e.g. divided by zero), true otherwise
 			explicit operator bool() const;
 
@@ -115,12 +121,6 @@ namespace sav
 			static unsigned int UnsafeIntegerPower(unsigned int _base, unsigned int _index);
 
 			/**
-			 * ToString - convert stored decimal value to a base10 string, e.g. "1234".
-			 * @return value as base10
-			 */
-			std::string ToString() const;
-
-			/**
 			 * Normalize - remove unsignificant zeros.
 			 * (e.g. for base10 : 0001023 -> 1023)
 			 */
@@ -131,34 +131,11 @@ namespace sav
 			 */
 			bool EqualsZero() const;
 
-			/**
-			 * CompareFrames - internal division utility function.
-			 * Unsafe and does not perform any checks!
-			 * Compares current division frame.
-			 * @param _lhs
-			 * @param _rhs, must be normalized (must not contain unsignificant zeros)
-			 * @return true if _lhs frame greater or equal than entire _rhs, false otherwise.
-			 *
-			 * @example
-			 * 1224 | 12
-			 * 12___| 102
-			 * 	 24
-			 * 	 24
-			 * 	  0
-			 *
-			 * The first frame in 1224 is 12, the second is 02, and the third is 24.
-			 * The first result is true, so we can perform intermediate subtraction,
-			 * the second is false, so multiply result by 10,
-			 * the third is true, so perform additional subtraction.
-			 *
-			 */
-			static bool CompareFrames(const Decimal& _lhs, int _lhsFrame, const Decimal& _rhs);
-
-			/**
-			 * AmplifyInBase256 - Amplify decimal value by
-			 * @param _digits in base256
-			 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
-			 */
+		/**
+		 * AmplifyInBase256 - Amplify decimal value by
+		 * @param _digits in base256
+		 * @example 0xFF-> Amplify(1) -> 0x00'FF (little-endian)
+		 */
 			Decimal& AmplifyInBase256(int _digits);
 
 			/**
@@ -168,13 +145,6 @@ namespace sav
 			 */
 			Decimal& AmplifyInBase10(int _digits);
 
-			/**
-			 * TODO IMPLEMENT
-			 * Internal procedure to perform exception-safe parsing without wrapping std::stoi.
-			 * @param _stringToCheck
-			 * @return DecimalStatus::Ok if Decimal can be constructed correctly from this string, otherwise appropriate error.
-			 */
-			static DecimalStatus CheckParseStringCoherency(const std::string& _stringToCheck);
 	};
 }
 

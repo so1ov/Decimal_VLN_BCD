@@ -167,7 +167,7 @@ std::string sav::Decimal::ToString() const
 
 	do
 	{
-		intermediateResult = intermediateResult->Quotient / Decimal{kBase10};
+		intermediateResult = intermediateResult->Quotient / kDecimalWhichEqualBase10;
 		result += std::to_string(intermediateResult->Remainder.ToUInt().value());
 	}while(!intermediateResult->Quotient.EqualsZero());
 
@@ -509,11 +509,6 @@ bool sav::Decimal::EqualsZero() const
 	return false;
 }
 
-bool sav::Decimal::CompareFrames(const sav::Decimal& _lhs, int _lhsFrame, const sav::Decimal& _rhs)
-{
-	return _lhs.m_digits[_lhsFrame] > _rhs.m_digits[_lhsFrame];
-}
-
 sav::Decimal& sav::Decimal::operator++(int)
 {
 	for(int i = 0; i < m_digits.size(); i++)
@@ -600,11 +595,6 @@ sav::DecimalStatus sav::Decimal::SetFromString(const std::string& _fromString)
 	}
 
 	return DecimalStatus::Ok;
-}
-
-sav::DecimalStatus sav::Decimal::CheckParseStringCoherency(const std::string& _stringToCheck)
-{
-	return DecimalStatus::Error_Underflow;
 }
 
 sav::Decimal sav::Decimal::DivideAndRoundInBase10(const sav::Decimal& _divisor) const
