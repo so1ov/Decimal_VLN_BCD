@@ -37,7 +37,7 @@ namespace sav
 
 	public:
 		// Returns true on coherent division, false otherwise (for example, if divided by zero)
-		explicit operator bool() const;
+		explicit operator bool() const noexcept;
 
 		// Quotient (integer part of the division result)
 		Decimal Quotient;

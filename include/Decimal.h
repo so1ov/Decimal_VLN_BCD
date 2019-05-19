@@ -59,17 +59,17 @@ namespace sav
 			std::string ToString() const;
 
 			// Returns false if Decimal integrity has been violated (e.g. divided by zero), true otherwise
-			explicit operator bool() const;
+			explicit operator bool() const noexcept;
 
 			// Comparison operators
-			bool operator==(const Decimal& _rhs) const;
-			bool operator!=(const Decimal& _rhs) const;
+			bool operator==(const Decimal& _rhs) const noexcept;
+			bool operator!=(const Decimal& _rhs) const noexcept;
 
-			bool operator<(const Decimal& _rhs) const;
-			bool operator>(const Decimal& _rhs) const;
+			bool operator<(const Decimal& _rhs) const noexcept;
+			bool operator>(const Decimal& _rhs) const noexcept;
 
-			bool operator<=(const Decimal& _rhs) const;
-			bool operator>=(const Decimal& _rhs) const;
+			bool operator<=(const Decimal& _rhs) const noexcept;
+			bool operator>=(const Decimal& _rhs) const noexcept;
 
 			// Immutable arithmetic operators.
 			Decimal operator+(const Decimal& _rhs) const;
@@ -99,7 +99,7 @@ namespace sav
 			/**
 		 	 * EqualsZero - return true if stored value equals zero, false otherwise.
 		 	 */
-			bool EqualsZero() const;
+			bool EqualsZero() const noexcept;
 
 		protected:
 			enum
